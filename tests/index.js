@@ -11,6 +11,14 @@ before(() => {
   ];
 });
 
+after(() => {
+  var dir = "tests/files/cut";
+
+  if (fs.existsSync(dir)) {
+    fs.rm(dir, { recursive: true, force: true }, console.error);
+  }
+});
+
 describe("test duration", () => {
   it("values returning from the 'getDuration' method should be equal to the ones in the array", (done) => {
     files.forEach((f) => {
@@ -22,7 +30,7 @@ describe("test duration", () => {
 });
 
 describe("test cutter", () => {
-  it("after the cutting opeartion, the duration of the new files should be equal to the ones in the array", (done) => {
+  it("after the cutting operation, the duration of the new files should be equal to the ones in the array", (done) => {
     var dir = "tests/files/cut";
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
@@ -37,6 +45,20 @@ describe("test cutter", () => {
       });
       var d = Duration.getDuration(dir + "/" + f.name);
       expect(f.newDuration).to.equal(parseInt(d.duration));
+    });
+    done();
+  });
+
+  it("returns non-empty buffer containing the new file", (done) => {
+    files.forEach((f) => {
+      const buffer = MP3Cutter.cut({
+        src: "tests/files/" + f.name,
+        start: f.start,
+        end: f.end,
+      });
+
+      expect(buffer).instanceOf(Buffer);
+      expect(buffer.length).to.be.above(0);
     });
     done();
   });
